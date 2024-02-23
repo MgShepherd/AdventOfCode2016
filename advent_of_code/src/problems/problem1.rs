@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 enum Direction {
     North,
     East,
@@ -5,7 +7,7 @@ enum Direction {
     West,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
 struct Point {
     x: i32,
     y: i32,
@@ -14,6 +16,7 @@ struct Point {
 pub fn solve(data: &str) {
     let mut current_direction = Direction::North;
     let mut current_point = Point { x: 0, y: 0 };
+    let mut visited_locations = HashMap::new();
 
     for instruction in data.split(',').map(|x| x.trim()) {
         if instruction.chars().nth(0).unwrap() == 'L' {
@@ -22,7 +25,14 @@ pub fn solve(data: &str) {
             current_direction = turn_right(&current_direction);
         }
         let move_amount = instruction[1..].parse::<i32>().unwrap();
-        move_in_direction(&current_direction, &mut current_point, move_amount);
+        if move_in_direction(
+            &current_direction,
+            &mut current_point,
+            &mut visited_locations,
+            move_amount,
+        ) {
+            break;
+        }
     }
 
     println!("Final Position: {:?}", current_point);
@@ -36,13 +46,27 @@ fn get_distance_from_origin(current_point: &Point) -> i32 {
     current_point.x.abs() + current_point.y.abs()
 }
 
-fn move_in_direction(current_direction: &Direction, current_point: &mut Point, move_amount: i32) {
-    match current_direction {
-        Direction::North => current_point.y -= move_amount,
-        Direction::East => current_point.x += move_amount,
-        Direction::South => current_point.y += move_amount,
-        Direction::West => current_point.x -= move_amount,
+fn move_in_direction(
+    current_direction: &Direction,
+    current_point: &mut Point,
+    visited_locations: &mut HashMap<Point, i8>,
+    mut move_amount: i32,
+) -> bool {
+    while move_amount > 0 {
+        match current_direction {
+            Direction::North => current_point.y -= 1,
+            Direction::East => current_point.x += 1,
+            Direction::South => current_point.y += 1,
+            Direction::West => current_point.x -= 1,
+        }
+        if visited_locations.contains_key(current_point) {
+            return true;
+        }
+        visited_locations.insert(*current_point, 1);
+        move_amount -= 1;
     }
+
+    false
 }
 
 fn turn_left(current_direction: &Direction) -> Direction {
