@@ -1,3 +1,4 @@
+use crate::utils::data_utils::Point;
 use std::collections::HashMap;
 
 enum Direction {
@@ -5,12 +6,6 @@ enum Direction {
     East,
     South,
     West,
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
-struct Point {
-    x: i32,
-    y: i32,
 }
 
 pub fn solve(data: &str) {
