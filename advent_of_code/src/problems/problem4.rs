@@ -1,44 +1,25 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
-
-const NUM_MAX_ELEMENTS: usize = 5;
-
 pub fn solve(data: &str) {
-    let mut real_id_sum = 0;
     for line in data.split('\n').filter(|x| x.len() > 0) {
-        real_id_sum += get_room_value(line);
+        decrpyt_room_name(line);
     }
-    println!("Real Room ID Sum: {real_id_sum}");
 }
 
-fn get_room_value(line: &str) -> i32 {
-    let (room_value, checksum) = line.split_at(line.find('[').unwrap());
-    let room_elements: Vec<&str> = room_value.split("-").collect();
-    let mut character_counts: HashMap<char, u32> = HashMap::new();
+fn decrpyt_room_name(line: &str) {
+    const LOWER_CASE_ASCII_START: u32 = 97;
+    const NUM_ALPHABET_LETTERS: u32 = 26;
 
-    for i in 0..(room_elements.len() - 1) {
-        room_elements[i].chars().for_each(|c| {
-            match character_counts.get(&c) {
-                Some(count) => character_counts.insert(c, count + 1),
-                None => character_counts.insert(c, 1),
-            };
-        })
+    let (room_value, _) = line.split_at(line.find('[').unwrap());
+    let (room_elements, sector_id_str) = room_value.split_at(room_value.rfind('-').unwrap());
+
+    let sector_id = sector_id_str[1..].parse::<u32>().unwrap();
+    let mut decrypted = String::new();
+
+    for element in room_elements.chars().filter(|x| x != &'-') {
+        let ascii_val = element.to_ascii_lowercase() as u32 - LOWER_CASE_ASCII_START;
+        let rotated_val = ((ascii_val + sector_id) % NUM_ALPHABET_LETTERS) + LOWER_CASE_ASCII_START;
+        decrypted.push(char::from_u32(rotated_val).unwrap());
     }
-    let mut ordered_elements: Vec<(&char, &u32)> = character_counts.iter().collect();
-    let checksum_chars: Vec<char> = checksum.chars().collect();
-    ordered_elements.sort_by(|a, b| {
-        let val_compare = b.1.cmp(&a.1);
-        if val_compare == Ordering::Equal {
-            return a.0.cmp(&b.0);
-        }
-        val_compare
-    });
-    for i in 0..NUM_MAX_ELEMENTS {
-        if &checksum_chars[i + 1] != ordered_elements[i].0 {
-            return 0;
-        }
+    if decrypted == "northpoleobjectstorage" {
+        println!("Decrypted Room Name: {decrypted}, Sector Id: {sector_id}");
     }
-    room_elements[room_elements.len() - 1]
-        .parse::<i32>()
-        .unwrap()
 }
