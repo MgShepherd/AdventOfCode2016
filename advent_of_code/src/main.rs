@@ -7,5 +7,5 @@ fn main() {
         println!("Problem loading data: {err}");
         process::exit(1);
     });
-    problems::problem4::solve(&problem_data);
+    problems::problem5::solve();
 }
