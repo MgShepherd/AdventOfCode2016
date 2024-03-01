@@ -16,7 +16,7 @@ pub fn solve(data: &str) {
         decoded_message.push(
             *frequency_map
                 .iter()
-                .max_by(|a, b| a.1.cmp(&b.1))
+                .min_by(|a, b| a.1.cmp(&b.1))
                 .map(|(k, _v)| k)
                 .unwrap(),
         )
