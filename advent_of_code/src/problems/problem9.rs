@@ -19,6 +19,21 @@ fn get_decompressed_sequence_length(elements: &str, current_index: &mut usize) -
         .map(|x| x.parse::<usize>().unwrap())
         .collect();
 
-    *current_index += elements.find(')').unwrap() + 1 + sequence_information[0];
-    sequence_information[0] * sequence_information[1]
+    let mut decompressed_length = 0;
+    let start_location = elements.find(')').unwrap() + 1;
+    let mut i = 0;
+    while i < sequence_information[0] {
+        match elements.chars().nth(start_location + i).unwrap() {
+            '(' => {
+                decompressed_length +=
+                    get_decompressed_sequence_length(&elements[(start_location + i + 1)..], &mut i)
+                        * sequence_information[1];
+            }
+            _ => decompressed_length += sequence_information[1],
+        }
+        i += 1;
+    }
+    *current_index += start_location + sequence_information[0];
+
+    decompressed_length
 }
